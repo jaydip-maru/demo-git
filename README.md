@@ -97,4 +97,175 @@ function App() {
 
 export default App;
 ```
+Step-3 Curd operation
 
+Backend
+1)Controler
+```
+import User from "../models/User.js";
+
+// CREATE USER
+export const createUser = async (req, res) => {
+    try {
+        const { name, email, age } = req.body;
+
+        const user = await User.create({
+            name,
+            email,
+            age
+        });
+
+        res.status(201).json({
+            success: true,
+            user
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// GET ALL USERS
+export const getUsers = async (req, res) => {
+    try {
+        const users = await User.find();
+
+        res.status(200).json({
+            success: true,
+            users
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// UPDATE USER
+export const updateUser = async (req, res) => {
+    try {
+        const user = await User.findByIdAndUpdate(
+            req.params.id,
+            req.body,
+            { new: true, runValidators: true }
+        );
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            user
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+// DELETE USER
+export const deleteUser = async (req, res) => {
+    try {
+        const user = await User.findByIdAndDelete(req.params.id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "User deleted successfully"
+        });
+
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+```
+
+2)Routes
+```
+
+import express from "express";
+
+import {
+    createUser,
+    getUsers,
+    updateUser,
+    deleteUser
+} from "../controllers/userController.js";
+
+const router = express.Router();
+
+router.post("/", createUser);
+router.get("/", getUsers);
+router.put("/:id", updateUser);
+router.delete("/:id", deleteUser);
+
+export default router;
+```
+3) Index.js
+   app.use("/api/users", userRoutes);
+
+
+
+
+Step-4 For Frontend
+
+```
+import { useEffect, useState } from "react";
+import axios from "axios";
+
+const API = "http://localhost:5000/api/users";
+
+function App() {
+    const [users, setUsers] = useState([]);
+
+    const fetchUsers = async () => {
+        try {
+            const { data } = await axios.get(API);
+            setUsers(data.users);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    useEffect(() => {
+        fetchUsers();
+    }, []);
+
+    return (
+        <div>
+            <h1>User Management</h1>
+
+            {users.map((user) => (
+                <div key={user._id}>
+                    <h3>{user.name}</h3>
+                    <p>{user.email}</p>
+                    <p>{user.age}</p>
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export default App;
+```
