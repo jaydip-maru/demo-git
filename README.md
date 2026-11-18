@@ -12,29 +12,89 @@ open a Secoend terminal and -> cd Frontend
 step-2 --> For Backend
 
 1) for initialize a backend
+ ```bash
 npm init -y
+```
 
 2)install Dependencys
+ ```bash
 npm i mongodb express cors dotenv
+ ```
 
 3)Create index.js file with this code
-const express=require('express'),
-http=require('http');
-const hostname='localhost';
-const port=8080;
-const app=express();
+```JavaScript
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-app.use((req, res)=> {
-        console.log(req.headers); 
-        res.statusCode=200; 
-        res.setHeader('Content-Type', 'text/html'); 
-        res.end('<html><body><h1>This is a test server</h1></body></html>');
+dotenv.config();
+
+const app = express();
+
+// Middleware
+app.use(cors());
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// Test route
+app.get("/", (req, res) => {
+    res.status(200).json({
+        success: true,
+        message: "Backend server is running!"
+    });
 });
-const sample_server=http.createServer(app);
 
-sample_server.listen(port, hostname, ()=> {
-        console.log(`Server running at http: //${hostname}:${port}/`);});
+// Server
+const PORT = process.env.PORT || 5000;
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});
+
+```
 
 4)Change Package.json
 Add into Script 
 "start": "node index.js"
+->Change type
+"type": "module"
+
+Step-2 Frontend
+
+1) For initialization
+   ```
+   npm create vite@latest .
+   ```
+   Select configuration
+Choose:
+- Framework: React
+- Variant: JavaScript
+- Linter: ESLint
+  this is for instalation
+```
+npm i
+```
+
+2) Start a Reat app
+   ```
+   npm run dev
+   ```
+3)Add this code into a APP.jsx
+this connect your front end with backend
+```
+import axios from "axios";
+import { useEffect } from "react";
+
+function App() {
+    useEffect(() => {
+        axios.get("http://localhost:5000")
+            .then(res => console.log(res.data))
+            .catch(err => console.log(err));
+    }, []);
+
+    return <h1>React Frontend Connected!</h1>;
+}
+
+export default App;
+```
+
